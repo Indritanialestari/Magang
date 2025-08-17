@@ -19,6 +19,9 @@
             </div>
         @endif
 
+        {{-- ========================================================= --}}
+        {{-- BAGIAN FILTER ANDA, TIDAK ADA YANG DIHILANGKAN --}}
+        {{-- ========================================================= --}}
         <form action="{{ route('karyawan-tetap.index') }}" method="GET" class="mb-6 p-4 border border-gray-200 rounded-md grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div class="col-span-full mb-4">
                 <h3 class="text-lg font-semibold">Filter Data</h3>
@@ -57,7 +60,13 @@
                        min="1">
             </div>
 
-            {{-- Dropdown Fixed Options --}}
+            <div>
+                <label for="tahun_kelipatan" class="block text-sm font-medium text-gray-700">Di Tahun</label>
+                <input type="number" name="tahun_kelipatan" id="tahun_kelipatan" value="{{ request('tahun_kelipatan') }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                       min="1900">
+            </div>
+
             <div>
                 <label for="golongan" class="block text-sm font-medium text-gray-700">Golongan</label>
                 <select name="golongan" id="golongan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -108,21 +117,40 @@
                 </select>
             </div>
 
-            <div class="col-span-full flex justify-between items-center mt-4">
-                <div>
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Terapkan Filter
-                    </button>
-                    <a href="{{ route('karyawan-tetap.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2">
-                        Reset Filter
-                    </a>
-                </div>
-                <div>
-                    <a href="{{ route('karyawan-tetap.exportPdf', request()->query()) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2">
-                        Download PDF
-                    </a>
-                </div>
+            <!-- <div>
+                <label for="status_kenaikan" class="block text-sm font-medium text-gray-700">Status Kenaikan</label>
+                <select name="status_kenaikan" id="status_kenaikan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <option value="">Semua Status Kenaikan</option>
+                    @foreach($statusKenaikanOptions as $option)
+                        <option value="{{ $option }}" {{ request('status_kenaikan') == $option ? 'selected' : '' }}>{{ $option }}</option>
+                    @endforeach
+                </select>
+            </div> -->
+
+            <div>
+                <label for="jenis_hukuman" class="block text-sm font-medium text-gray-700">Jenis Hukuman</label>
+                <select name="jenis_hukuman" id="jenis_hukuman" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <option value="">Semua Jenis Hukuman</option>
+                    @foreach($jenisHukumanOptions as $option)
+                        <option value="{{ $option }}" {{ request('jenis_hukuman') == $option ? 'selected' : '' }}>{{ $option }}</option>
+                    @endforeach
+                </select>
             </div>
+            
+ {{-- Cari div ini di dalam form filter Anda --}}
+<div class="col-span-full flex justify-between items-center mt-4">
+    <div>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Terapkan Filter</button>
+        <a href="{{ route('karyawan-tetap.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded ml-2">Reset Filter</a>
+    </div>
+    <div>
+        {{-- TOMBOL BARU DITAMBAHKAN DI SINI --}}
+        <!-- <button type="button" id="cek-semua-prospek-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">
+            Cek Prospek Gaji -->
+        </button>
+        <a href="{{ route('karyawan-tetap.exportPdf', request()->query()) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded ml-2">Download PDF</a>
+    </div>
+</div>
         </form>
 
         <div class="mb-6 flex space-x-4">
@@ -138,11 +166,9 @@
             <a href="{{ route('karyawan-tetap.create') }}" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                 + Tambah Pegawai
             </a>
-            {{-- Form untuk Hapus Data Terpilih --}}
             <form id="bulk-delete-form" action="{{ route('karyawan-tetap.destroy.bulk') }}" method="POST">
                 @csrf
                 @method('DELETE')
-                {{-- Input tersembunyi ini akan diisi oleh JavaScript sebelum submit --}}
                 <input type="hidden" name="ids_to_delete" id="ids-to-delete-input">
                 <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                     Hapus Data Terpilih
@@ -151,113 +177,215 @@
         </div>
 
         <div class="overflow-x-auto shadow-md sm:rounded-lg">
-            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <table class="w-full text-sm text-left text-gray-500">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    {{-- Semua Kolom Header Anda Utuh --}}
                     <tr>
                         <th scope="col" class="p-4">
-                            <div class="flex items-center">
-                                <input id="checkbox-all-items" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="checkbox-all-items" class="sr-only">checkbox</label>
-                            </div>
+                            <input id="checkbox-all-items" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                         </th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Nama</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Nomor Induk</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Tanggal Lahir</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Gender</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Jabatan</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Bagian</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Unit Kerja</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Pendidikan</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Klasifikasi</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Status Keluarga</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Jml. Anak</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Tanggal Masuk</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Masa Kerja</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Golongan</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Gaji</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Status</th>
-                        <th scope="col" class="px-6 py-3 min-w-max-content">Aksi</th>
+                        <th scope="col" class="px-6 py-3">Nama</th>
+                        <th scope="col" class="px-6 py-3">Nomor Induk</th>
+                        <th scope="col" class="px-6 py-3">Tanggal Lahir</th>
+                        <th scope="col" class="px-6 py-3">Gender</th>
+                        <th scope="col" class="px-6 py-3">Jabatan</th>
+                        <th scope="col" class="px-6 py-3">Bagian</th>
+                        <th scope="col" class="px-6 py-3">Unit Kerja</th>
+                        <th scope="col" class="px-6 py-3">Pendidikan</th>
+                        <th scope="col" class="px-6 py-3">Klasifikasi</th>
+                        <th scope="col" class="px-6 py-3">Status Keluarga</th>
+                        <th scope="col" class="px-6 py-3">Jml. Anak</th>
+                        <th scope="col" class="px-6 py-3">Tanggal Masuk</th>
+                        <th scope="col" class="px-6 py-3">Masa Kerja</th>
+                        <th scope="col" class="px-6 py-3">Golongan</th>
+                        <th scope="col" class="px-6 py-3">Gaji</th>
+                        <th scope="col" class="px-6 py-3">Prospek Gaji Baru</th>
+                        <th scope="col" class="px-6 py-3">Status Kenaikan</th>
+                        <th scope="col" class="px-6 py-3">Jenis Hukuman</th>
+                        <th scope="col" class="px-6 py-3">Alasan Hukuman</th>
+                        <th scope="col" class="px-6 py-3">Status</th>
+                        <th scope="col" class="px-6 py-3">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse ($pegawais as $pegawai)
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <td class="w-4 p-4">
-                            <div class="flex items-center">
-                                <input id="checkbox-item-{{ $pegawai->id }}" type="checkbox" name="selected_ids[]" value="{{ $pegawai->id }}" class="item-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="checkbox-item-{{ $pegawai->id }}" class="sr-only">checkbox</label>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">{{ $pegawai->nama }}</td>
-                        <td class="px-6 py-4">{{ $pegawai->nomor_induk }}</td>
-                        <td class="px-6 py-4">{{ \Carbon\Carbon::parse($pegawai->tanggal_lahir)->format('Y-m-d') }}</td>
-                        <td class="px-6 py-4">{{ ucfirst($pegawai->gender) }}</td>
-                        <td class="px-6 py-4">{{ $pegawai->jabatan }}</td>
-                        <td class="px-6 py-4">{{ $pegawai->bagian }}</td>
-                        <td class="px-6 py-4">{{ $pegawai->unit_kerja }}</td>
-                        <td class="px-6 py-4">{{ $pegawai->pendidikan }}</td>
-                        <td class="px-6 py-4">{{ $pegawai->klasifikasi }}</td>
-                        <td class="px-6 py-4">{{ $pegawai->keluarga_status }}</td>
-                        <td class="px-6 py-4 text-center">{{ $pegawai->keluarga_anak }}</td>
-                        <td class="px-6 py-4">{{ \Carbon\Carbon::parse($pegawai->tanggal_masuk)->format('Y-m-d') }}</td>
-                        <td class="px-6 py-4 text-center">{{ $pegawai->masa_kerja }} tahun</td>
-                        <td class="px-6 py-4 text-center">{{ $pegawai->golongan }}</td>
-                        <td class="px-6 py-4 text-right">Rp {{ number_format($pegawai->gaji, 0, ',', '.') }}</td>
-                        <td class="px-6 py-4">{{ $pegawai->status }}</td>
-                        <td class="px-6 py-4 flex items-center space-x-2">
-                            <a href="{{ route('karyawan-tetap.edit', $pegawai->id) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                            <form action="{{ route('karyawan-tetap.destroy', $pegawai->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="font-medium text-red-600 dark:text-red-500 hover:underline">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @empty
-                        <tr>
-                            <td colspan="18" class="px-6 py-4 text-center text-gray-500">Tidak ada data pegawai yang ditemukan.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
+<tbody>
+    @forelse ($pegawais as $pegawai)
+    {{-- Tambahkan atribut data-id pada baris <tr> --}}
+    <tr class="bg-white border-b hover:bg-gray-50" data-id="{{ $pegawai->id }}">
+        <td class="w-4 p-4">
+            <input id="checkbox-item-{{ $pegawai->id }}" type="checkbox" name="selected_ids[]" value="{{ $pegawai->id }}" class="item-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+        </td>
+        <td class="px-6 py-4">{{ $pegawai->nama }}</td>
+        <td class="px-6 py-4">{{ $pegawai->nomor_induk }}</td>
+        <td class="px-6 py-4">{{ $pegawai->tanggal_lahir ? $pegawai->tanggal_lahir->format('d M Y') : '-' }}</td>
+        <td class="px-6 py-4">{{ $pegawai->gender }}</td>
+        <td class="px-6 py-4">{{ $pegawai->jabatan }}</td>
+        <td class="px-6 py-4">{{ $pegawai->bagian }}</td>
+        <td class="px-6 py-4">{{ $pegawai->unit_kerja }}</td>
+        <td class="px-6 py-4">{{ $pegawai->pendidikan }}</td>
+        <td class="px-6 py-4">{{ $pegawai->klasifikasi }}</td>
+        <td class="px-6 py-4">{{ $pegawai->keluarga_status }}</td>
+        <td class="px-6 py-4 text-center">{{ $pegawai->keluarga_anak }}</td>
+        <td class="px-6 py-4">{{ $pegawai->tanggal_masuk ? $pegawai->tanggal_masuk->format('d M Y') : '-' }}</td>
+        <td class="px-6 py-4 text-center">{{ $pegawai->masa_kerja ? $pegawai->masa_kerja . ' tahun' : '-' }}</td>
+        <td class="px-6 py-4 text-center">{{ $pegawai->golongan ?? '-' }}</td>
+        <td class="px-6 py-4 text-right">Rp {{ number_format($pegawai->gaji, 0, ',', '.') }}</td>
+        
+        {{-- Tambahkan id unik pada sel <td> ini --}}
+        <td class="px-6 py-4 text-right" id="kenaikan-gaji-cell-{{ $pegawai->id }}">
+            @if(isset($pegawai->kenaikan_gaji_dihitung) && $pegawai->kenaikan_gaji_dihitung)
+                <span class="font-bold text-green-600">Rp {{ number_format($pegawai->kenaikan_gaji_dihitung, 0, ',', '.') }}</span>
+            @else
+                -
+            @endif
+        </td>
+        
+        {{-- Tambahkan id unik pada sel <td> ini --}}
+        <td class="px-6 py-4" id="status-kenaikan-cell-{{ $pegawai->id }}">
+            @if(isset($pegawai->kenaikan_gaji_dihitung) && $pegawai->kenaikan_gaji_dihitung)
+                <form action="{{ route('karyawan-tetap.approveRaise', $pegawai->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menyetujui kenaikan gaji untuk {{ $pegawai->nama }}?');">
+                    @csrf
+                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded text-xs">
+                        Setujui
+                    </button>
+                </form>
+            @else
+                {{ $pegawai->status_kenaikan ?? '-' }}
+            @endif
+        </td>
+        
+        <td class="px-6 py-4">{{ $pegawai->jenis_hukuman ?? '-' }}</td>
+        <td class="px-6 py-4">{{ $pegawai->alasan_hukuman ?? '-' }}</td>
+        
+        <td class="px-6 py-4">
+            @if($pegawai->status == 'Aktif')
+                <span class="bg-green-100 text-green-800 text-xs font-medium me-2 px-2-5 py-0.5 rounded">Aktif</span>
+            @else
+                <span class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2-5 py-0.5 rounded">Tidak Aktif</span>
+            @endif
+        </td>
+        <td class="px-6 py-4 flex items-center space-x-2">
+            <a href="{{ route('karyawan-tetap.edit', $pegawai->id) }}" class="font-medium text-blue-600 hover:underline">Edit</a>
+            <form action="{{ route('karyawan-tetap.destroy', $pegawai->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="font-medium text-red-600 hover:underline">Hapus</button>
+            </form>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="22" class="px-6 py-4 text-center text-gray-500">Tidak ada data pegawai yang ditemukan.</td>
+    </tr>
+    @endforelse
+</tbody>
             </table>
         </div>
 
         <div class="mt-6">
-            {{ $pegawais->links() }}
+            {{ $pegawais->withQueryString()->links() }}
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkboxAll = document.getElementById('checkbox-all-items');
-            const itemCheckboxes = document.querySelectorAll('.item-checkbox');
-            const bulkDeleteForm = document.getElementById('bulk-delete-form');
-            const idsToDeleteInput = document.getElementById('ids-to-delete-input');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxAll = document.getElementById('checkbox-all-items');
+        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+        const bulkDeleteForm = document.getElementById('bulk-delete-form');
+        const idsToDeleteInput = document.getElementById('ids-to-delete-input');
 
-            if (checkboxAll) {
-                checkboxAll.addEventListener('change', function() {
-                    itemCheckboxes.forEach(cb => cb.checked = this.checked);
-                });
-            }
+        if (checkboxAll) {
+            checkboxAll.addEventListener('change', function() {
+                itemCheckboxes.forEach(cb => cb.checked = this.checked);
+            });
+        }
 
-            if (bulkDeleteForm) {
-                bulkDeleteForm.addEventListener('submit', function(event) {
-                    const selectedIds = Array.from(itemCheckboxes)
-                                            .filter(cb => cb.checked)
-                                            .map(cb => cb.value);
+        if (bulkDeleteForm) {
+            bulkDeleteForm.addEventListener('submit', function(event) {
+                const selectedIds = Array.from(itemCheckboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
 
-                    if (selectedIds.length === 0) {
-                        alert('Pilih setidaknya satu data untuk dihapus.');
+                if (selectedIds.length === 0) {
+                    alert('Pilih setidaknya satu data untuk dihapus.');
+                    event.preventDefault();
+                } else {
+                    if (!confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' data terpilih?')) {
                         event.preventDefault();
                     } else {
-                        if (!confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' data terpilih?')) {
-                            event.preventDefault();
-                        } else {
-                            idsToDeleteInput.value = JSON.stringify(selectedIds);
-                        }
+                        idsToDeleteInput.value = JSON.stringify(selectedIds);
                     }
+                }
+            });
+        }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const cekSemuaBtn = document.getElementById('cek-semua-prospek-btn');
+        const filterForm = document.getElementById('filter-form'); // Pastikan form filter Anda punya id="filter-form"
+
+        if (cekSemuaBtn && filterForm) {
+            cekSemuaBtn.addEventListener('click', function () {
+                
+                this.textContent = 'Mengecek Semua Data...';
+                this.disabled = true;
+
+                // 1. Ambil semua parameter filter yang sedang aktif
+                const formData = new FormData(filterForm);
+                const params = new URLSearchParams(formData).toString();
+
+                // 2. Minta ke server untuk menghitung SEMUA data yang terfilter (bukan hanya yang di halaman ini)
+                fetch(`{{ route('karyawan-tetap.index') }}?${params}&cek_semua=true`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest' // Penting untuk menandai ini sebagai request AJAX
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 3. Setelah dapat semua hasil, update tabel yang terlihat di halaman ini
+                    updateTableWithResults(data);
+                    
+                    this.textContent = 'Cek Prospek Gaji';
+                    this.disabled = false;
+                    alert('Pengecekan selesai!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan.');
+                    this.textContent = 'Cek Prospek Gaji';
+                    this.disabled = false;
                 });
+            });
+        }
+    });
+
+    function updateTableWithResults(data) {
+        // 'data' adalah objek berisi { id: gaji, id: gaji, ... }
+        for (const pegawaiId in data) {
+            const kenaikanGaji = data[pegawaiId];
+            
+            // Cari sel di tabel yang sedang ditampilkan
+            const kenaikanGajiCell = document.getElementById(`kenaikan-gaji-cell-${pegawaiId}`);
+            const statusKenaikanCell = document.getElementById(`status-kenaikan-cell-${pegawaiId}`);
+
+            // Jika selnya ada di halaman ini, update isinya
+            if (kenaikanGajiCell && statusKenaikanCell) {
+                if (kenaikanGaji) {
+                    const formattedGaji = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(kenaikanGaji);
+                    kenaikanGajiCell.innerHTML = `<span class="font-bold text-green-600">${formattedGaji.replace('Rp', 'Rp ')}</span>`;
+                    
+                    statusKenaikanCell.innerHTML = `
+                        <form action="/karyawan-tetap/${pegawaiId}/approve-raise" method="POST" onsubmit="return confirm('Anda yakin?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded text-xs">
+                                Setujui
+                            </button>
+                        </form>
+                    `;
+                } else {
+                    kenaikanGajiCell.innerHTML = '-';
+                    statusKenaikanCell.innerHTML = '-';
+                }
             }
-        });
-    </script>
+        }
+    });
+</script>
 @endsection
