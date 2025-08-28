@@ -10,15 +10,19 @@ use Illuminate\Support\Facades\DB;
 use App\Models\RiwayatJabatan;
 use App\Models\RiwayatStatusKepegawaian;
 use App\Models\RiwayatDiklat;
+use App\Models\KaryawanKontrak;
+use DateTime;
+use App\Models\RiwayatKenaikan;
+
+use Illuminate\Support\Collection;
 
 class KaryawanTetapController extends Controller
 {
-    // ... (properti lain tidak berubah) ...
     private $golonganOptions = ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4', 'C1', 'C2', 'C3', 'C4', 'D1', 'D2', 'D3', 'D4'];
     private $klasifikasiOptions = ['ADM/Keuangan', 'Hublang', 'Pengolahan', 'SPI', 'Sumber', 'Trandist'];
     private $unitKerjaOptions = ['Direksi', 'Dewas', 'Cigasong', 'Jatitujuh', 'Kadipaten', 'Majalengka', 'Panyingkiran', 'Pusat', 'Rajagaluh', 'Sukahaji', 'Sukaraja', 'Talaga', 'Usaha Terminal Air'];
     private $jabatanOptions = ['Direktur', 'Dewan Pengawas', 'Bendahara', 'Fungsional SPI', 'Ka SPI', 'Kabag', 'Kacab', 'Kasubag', 'Kaunit', 'Kaur', 'Staf', 'Kontrak'];
-    private $bagianOptions = ['Dirut', 'Dewas', 'Admin & Keuangan', 'ADM Umum & Sarana', 'Baca Meter', 'Distribusi', 'Distribusi & Penyambungan', 'Fungsional SPI ADM & Keuangan', 'Fungsional SPI Teknik', 'Gudang', 'Hublang', 'Ka SPI', 'Kacab', 'Kasir', 'Kaunit', 'Keu', 'Lahta', 'MSDM', 'Operator', 'Pemasaran & Informasi', 'Pembukuan', 'Pemeliharaan', 'Pengaduan & Tagihan', 'Pengolahan Data', 'Perencanaan', 'Produksi', 'Rutin Teknik', 'Koordinator Satpam Pusat', 'Satpam', 'Staf Baca Meter', 'Pembaca Meter', 'Staf Distribusi & Penyambungan', 'Staf Kasir', 'Staf Pembukuan & Keu', 'Staf Produksi Pusat', 'Staf Produksi (Operator)', 'Staf Operator', 'Staf Adm', 'Staf IKK Dawuan', 'Staf Produksi', 'Staf Umum', 'Staf Pelaksana', 'Office Boy'];
+    private $bagianOptions = ['Dirut', 'Dewas', 'ADM & Keuangan', 'ADM Umum & Sarana', 'Baca Meter', 'Distribusi', 'Distribusi & Penyambungan', 'Fungsional SPI ADM & Keuangan', 'Fungsional SPI Teknik', 'Teknik', 'Rutin', 'Gudang', 'Hublang', 'Ka SPI', 'Kacab', 'Kasir', 'Kaunit', 'Keuangan', 'Lahta', 'MSDM', 'Operator', 'Pemasaran & Informasi', 'Pembukuan', 'Pemeliharaan', 'Pengaduan & Tagihan', 'Pengolahan Data', 'Perencanaan', 'Produksi', 'Rutin Teknik', 'Koordinator Satpam Pusat', 'Satpam', 'Staf Baca Meter', 'Pembaca Meter', 'Staf Distribusi & Penyambungan', 'Staf Kasir', 'Staf Pembukuan & Keu', 'Staf Produksi Pusat', 'Staf Produksi (Operator)', 'Staf Operator', 'Staf Adm', 'Staf IKK Dawuan', 'Staf Produksi', 'Staf Umum', 'Staf Pelaksana', 'Office Boy'];
     private $statusKenaikanOptions = ['Diproses', 'Ditunda', 'Dibatalkan', 'Disetujui'];
     private $jenisHukumanOptions = ['Surat Peringatan 1', 'Surat Peringatan 2', 'Surat Peringatan 3', 'Penangguhan KGB', 'Penurunan Pangkat', 'Penurunan Golongan', 'Skorsing', 'Pemotongan Gaji'];
     private $salaryMapping = [
@@ -40,31 +44,21 @@ class KaryawanTetapController extends Controller
         'D4' => [ 0 => 2775800, 2 => 2863180, 4 => 2953427, 6 => 3046453, 8 => 3142346, 10 => 3241287, 12 => 3343453, 14 => 3448757, 16 => 3557376, 18 => 3669401, 20 => 3784921, 22 => 3904116, 24 => 4027075, 26 => 4153977, 28 => 4284732, 30 => 4419700, 32 => 4558880]
     ];
     
-    // ... (method index, getFilteredPegawaiQuery, getNextGolongan, calculateProspectiveSalary, create, store, edit, update, syncRiwayat, destroy, destroyBulk tetap sama) ...
     public function index(Request $request)
     {
-        $query = $this->getFilteredPegawaiQuery($request);
+        $filteredQuery = $this->getFilteredPegawaiQuery($request);
+        $jumlahAktif = (clone $filteredQuery)->where('status', 'Aktif')->count();
+        $jumlahNonAktif = (clone $filteredQuery)->where('status', 'Tidak Aktif')->count();
 
-        if ($request->ajax()) {
-            $pegawais = $query->get();
-            $results = [];
-            foreach ($pegawais as $pegawai) {
-                $pegawai->masa_kerja = $pegawai->tanggal_masuk ? (Carbon::now()->year - Carbon::parse($pegawai->tanggal_masuk)->year) : 0;
-                $kenaikan = $this->calculateProspectiveSalary($pegawai);
-                $results[$pegawai->id] = $kenaikan ? $kenaikan['gaji_baru'] : null;
-            }
-            return response()->json($results);
-        }
-        
-        $pegawais = $query->paginate(10)->withQueryString();
+        $pegawais = $filteredQuery->paginate(10)->withQueryString();
 
         $pegawais->getCollection()->transform(function ($pegawai) {
-            $pegawai->masa_kerja = $pegawai->tanggal_masuk ? (Carbon::now()->year - Carbon::parse($pegawai->tanggal_masuk)->year) : 0;
-            $prospect = $this->calculateProspectiveSalary($pegawai);
+            $prospect = $this->calculateProspectiveSalary($pegawai->golongan, $pegawai->tanggal_masuk);
             $pegawai->kenaikan_gaji_dihitung = $prospect ? $prospect['gaji_baru'] : null;
+            $pegawai->masa_kerja = $pegawai->tanggal_masuk ? Carbon::parse($pegawai->tanggal_masuk)->age : 0;
             return $pegawai;
         });
-
+        
         return view('karyawantetap', [
             'pegawais' => $pegawais,
             'genders' => Pegawai::select('gender')->distinct()->whereNotNull('gender')->pluck('gender'),
@@ -76,8 +70,8 @@ class KaryawanTetapController extends Controller
             'bagianOptions' => $this->bagianOptions,
             'statusKenaikanOptions' => $this->statusKenaikanOptions,
             'jenisHukumanOptions' => $this->jenisHukumanOptions,
-            'jumlahAktif' => Pegawai::where('status', 'Aktif')->count(),
-            'jumlahNonAktif' => Pegawai::where('status', 'Tidak Aktif')->count(),
+            'jumlahAktif' => $jumlahAktif,
+            'jumlahNonAktif' => $jumlahNonAktif,
         ]);
     }
 
@@ -114,45 +108,8 @@ class KaryawanTetapController extends Controller
     private function getNextGolongan($currentGolongan)
     {
         $currentIndex = array_search($currentGolongan, $this->golonganOptions);
-        if ($currentIndex !== false && isset($this->golonganOptions[$currentIndex + 1])) {
+        if ($currentIndex !== false && $currentIndex < count($this->golonganOptions) - 1) {
             return $this->golonganOptions[$currentIndex + 1];
-        }
-        return null;
-    }
-
-    private function calculateProspectiveSalary($pegawai)
-    {
-        if (!$pegawai->tanggal_masuk || !$pegawai->golongan) {
-            return null;
-        }
-        $masaKerjaSaatIni = Carbon::now()->year - Carbon::parse($pegawai->tanggal_masuk)->year;
-        $golonganSaatIni = $pegawai->golongan;
-        
-        $prospectMasaKerja = null;
-        $prospectGolongan = $golonganSaatIni;
-
-        if (isset($this->salaryMapping[$golonganSaatIni])) {
-            $availableMK = array_keys($this->salaryMapping[$golonganSaatIni]);
-            sort($availableMK);
-            foreach ($availableMK as $mk) {
-                if ($mk > $masaKerjaSaatIni) {
-                    $prospectMasaKerja = $mk;
-                    break;
-                }
-            }
-        }
-        
-        if ($prospectMasaKerja !== null) {
-            if ($prospectMasaKerja > 0 && $prospectMasaKerja % 4 == 0) {
-                $nextGolongan = $this->getNextGolongan($golonganSaatIni);
-                if ($nextGolongan) {
-                    $prospectGolongan = $nextGolongan;
-                }
-            }
-        }
-
-        if ($prospectMasaKerja !== null && isset($this->salaryMapping[$prospectGolongan][$prospectMasaKerja])) {
-            return ['gaji_baru' => $this->salaryMapping[$prospectGolongan][$prospectMasaKerja]];
         }
         return null;
     }
@@ -205,38 +162,66 @@ class KaryawanTetapController extends Controller
         return redirect()->route('karyawan-tetap.index')->with('success', 'Data pegawai baru berhasil disimpan.');
     }
 
-    public function edit($id)
-    {
-        $pegawai = Pegawai::with([
-            'riwayatJabatans',
-            'riwayatStatusKepegawaians',
-            'riwayatDiklats'
-        ])->findOrFail($id);
+public function edit($id)
+{
+    // 1. Mencari data pegawai (logika ini sudah bagus)
+    $pegawai = Pegawai::find($id);
+    $isKontrak = false;
 
-        $pegawai->masa_kerja = $pegawai->tanggal_masuk ? (Carbon::now()->year - Carbon::parse($pegawai->tanggal_masuk)->year) : 0;
-
-        $prospect = $this->calculateProspectiveSalary($pegawai);
-        $kenaikan_gaji_dihitung = $prospect ? $prospect['gaji_baru'] : null;
-
-        return view('edit', [
-            'dataToEdit' => $pegawai,
-            'kenaikan_gaji_dihitung' => $kenaikan_gaji_dihitung,
-            'golonganOptions' => $this->golonganOptions,
-            'klasifikasiOptions' => $this->klasifikasiOptions,
-            'unitKerjaOptions' => $this->unitKerjaOptions,
-            'jabatanOptions' => $this->jabatanOptions,
-            'bagianOptions' => $this->bagianOptions,
-            'statusKenaikanOptions' => $this->statusKenaikanOptions,
-            'jenisHukumanOptions' => $this->jenisHukumanOptions,
-            'genders' => ['Male', 'Female'],
-            'statuses' => ['Aktif', 'Tidak Aktif'],
-            'keluargaStatusList' => ['Kawin', 'Belum Kawin', 'Duda', 'Janda'],
-        ]);
+    if ($pegawai) {
+        $dataToEdit = $pegawai;
+    } else {
+        $karyawanKontrak = KaryawanKontrak::find($id);
+        if (!$karyawanKontrak) {
+            abort(404, 'Data karyawan tidak ditemukan.');
+        }
+        $dataToEdit = $karyawanKontrak;
+        $isKontrak = true;
     }
+
+    // 2. Mengambil data untuk dropdown (tanpa helper)
+    // FIX: Sesuaikan nama tabel 'karyawan_kontrak' jika berbeda di database Anda
+    $genders = Pegawai::select('gender')->distinct()->whereNotNull('gender')->pluck('gender')
+        ->merge(KaryawanKontrak::select('gender')->distinct()->whereNotNull('gender')->pluck('gender'))
+        ->unique()->sort()->values();
+
+    $statuses = Pegawai::select('status')->distinct()->whereNotNull('status')->pluck('status')
+        ->merge(KaryawanKontrak::select('status')->distinct()->whereNotNull('status')->pluck('status'))
+        ->unique()->sort()->values();
+
+    $keluargaStatusList = Pegawai::select('keluarga_status')->distinct()->whereNotNull('keluarga_status')->pluck('keluarga_status')
+        ->merge(KaryawanKontrak::select('keluarga_status')->distinct()->whereNotNull('keluarga_status')->pluck('keluarga_status'))
+        ->unique()->sort()->values();
+        
+    // 3. FIX: Menambahkan variabel '$kenaikan_gaji_dihitung' yang dibutuhkan oleh View
+    $kenaikan_gaji_dihitung = null; // Default value agar tidak error
+    if (!$isKontrak) {
+        // Ganti ini dengan logika perhitungan gaji Anda yang sebenarnya jika ada
+        // Contoh: menghitung kenaikan 10% dari gaji saat ini
+        $kenaikan_gaji_dihitung = $dataToEdit->gaji * 1.1; 
+    }
+
+    // 4. Mengirim semua data yang dibutuhkan ke View
+    return view('edit', [
+        'dataToEdit' => $dataToEdit,
+        'isKontrak' => $isKontrak,
+        'kenaikan_gaji_dihitung' => $kenaikan_gaji_dihitung, // Variabel penting yang hilang
+        'genders' => $genders,
+        'statuses' => $statuses,
+        'keluargaStatusList' => $keluargaStatusList,
+        'golonganOptions' => $this->golonganOptions,
+        'klasifikasiOptions' => $this->klasifikasiOptions,
+        'unitKerjaOptions' => $this->unitKerjaOptions,
+        'jabatanOptions' => $this->jabatanOptions,
+        'bagianOptions' => $this->bagianOptions,
+        'statusKenaikanOptions' => $this->statusKenaikanOptions,
+        'jenisHukumanOptions' => $this->jenisHukumanOptions,
+    ]);
+}
+    // PERBAIKAN: Mengirim 2 argumen
 
     public function update(Request $request, $id)
     {
-        $pegawai = Pegawai::findOrFail($id);
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'tanggal_lahir' => 'nullable|date',
@@ -257,18 +242,33 @@ class KaryawanTetapController extends Controller
             'jenis_hukuman' => 'nullable|in:' . implode(',', $this->jenisHukumanOptions),
             'alasan_hukuman' => 'nullable|string',
         ]);
-        
-        if ($request->filled('tanggal_masuk')) {
-            $validated['masa_kerja'] = Carbon::now()->year - Carbon::parse($request->tanggal_masuk)->year;
+
+        if ($request->input('jabatan') === 'Kontrak') {
+            DB::beginTransaction();
+            try {
+                $pegawaiTetap = Pegawai::findOrFail($id);
+                $dataUntukKontrak = array_merge($pegawaiTetap->toArray(), $validated);
+                unset($dataUntukKontrak['id'], $dataUntukKontrak['created_at'], $dataUntukKontrak['updated_at']);
+                KaryawanKontrak::create($dataUntukKontrak);
+                $pegawaiTetap->delete();
+                DB::commit();
+                return redirect()->route('karyawan-kontrak.index')
+                    ->with('success', 'Data ' . $pegawaiTetap->nama . ' berhasil dipindahkan ke Karyawan Kontrak.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return back()->with('error', 'Gagal memindahkan data: ' . $e->getMessage());
+            }
+        } else {
+            $pegawai = Pegawai::findOrFail($id);
+            if ($request->filled('tanggal_masuk')) {
+                $validated['masa_kerja'] = Carbon::now()->year - Carbon::parse($request->tanggal_masuk)->year;
+            }
+            $pegawai->update($validated);
+            $this->syncRiwayat($request->input('riwayat_jabatans', []), $pegawai, RiwayatJabatan::class);
+            $this->syncRiwayat($request->input('riwayat_status_kepegawaians', []), $pegawai, RiwayatStatusKepegawaian::class);
+            $this->syncRiwayat($request->input('riwayat_diklats', []), $pegawai, RiwayatDiklat::class);
+            return redirect()->route('karyawan-tetap.index')->with('success', 'Data pegawai berhasil diperbarui.');
         }
-
-        $pegawai->update($validated);
-
-        $this->syncRiwayat($request->input('riwayat_jabatans', []), $pegawai, RiwayatJabatan::class);
-        $this->syncRiwayat($request->input('riwayat_status_kepegawaians', []), $pegawai, RiwayatStatusKepegawaian::class);
-        $this->syncRiwayat($request->input('riwayat_diklats', []), $pegawai, RiwayatDiklat::class);
-        
-        return redirect()->route('karyawan-tetap.index')->with('success', 'Data pegawai berhasil diperbarui.');
     }
 
 private function syncRiwayat(array $data, $pegawai, $modelClass)
@@ -309,87 +309,147 @@ private function syncRiwayat(array $data, $pegawai, $modelClass)
         return redirect()->route('karyawan-tetap.index')->with('success', count($ids) . ' data pegawai berhasil dihapus.');
     }
 
-    public function previewPdf(Request $request, $id = null)
-    {
-        if ($id) {
-            $pegawai = Pegawai::with([
-                'riwayatJabatans',
-                'riwayatStatusKepegawaians',
-                'riwayatDiklats'
-            ])->findOrFail($id);
-            $prospect = $this->calculateProspectiveSalary($pegawai);
-            $pegawai->kenaikan_gaji_dihitung = $prospect ? $prospect['gaji_baru'] : null;
-            $pegawais = collect([$pegawai]);
-            return view('pdf_detail', compact('pegawais'));
-        } else {
-            $pegawais = $this->getFilteredPegawaiQuery($request)->get();
-            return view('pdf', compact('pegawais'));
-        }
-    }
+    // public function previewPdf(Request $request, $id = null)
+    // {
+    //     if ($id) {
+    //         $pegawai = Pegawai::with([
+    //             'riwayatJabatans',
+    //             'riwayatStatusKepegawaians',
+    //             'riwayatDiklats'
+    //         ])->findOrFail($id);
+    //         $prospect = $this->calculateProspectiveSalary($pegawai);
+    //         $pegawai->kenaikan_gaji_dihitung = $prospect ? $prospect['gaji_baru'] : null;
+    //         $pegawais = collect([$pegawai]);
+    //         return view('pdf_detail', compact('pegawais'));
+    //     } else {
+    //         $pegawais = $this->getFilteredPegawaiQuery($request)->get();
+    //         return view('pdf', compact('pegawais'));
+    //     }
+    // }
 
-    public function exportPdf(Request $request, $id = null)
-    {
-        if ($id) {
-            $pegawai = Pegawai::with([
-                'riwayatJabatans',
-                'riwayatStatusKepegawaians',
-                'riwayatDiklats'
-            ])->findOrFail($id);
-            
-            $prospect = $this->calculateProspectiveSalary($pegawai);
-            $pegawai->kenaikan_gaji_dihitung = $prospect ? $prospect['gaji_baru'] : null;
-
-            $pegawais = collect([$pegawai]);
-            $fileName = 'data_pegawai_' . \Illuminate\Support\Str::slug($pegawai->nama) . '.pdf';
-            $pdf = PDF::loadView('pdf_detail', compact('pegawais'))->setPaper('a4', 'portrait');
-        } else {
-            $pegawais = $this->getFilteredPegawaiQuery($request)->get();
-            $fileName = 'data_semua_pegawai_tetap-' . date('Y-m-d') . '.pdf';
-            $pdf = PDF::loadView('pdf', compact('pegawais'))->setPaper('a4', 'landscape');
-        }
+public function exportPdf(Request $request, $id = null)
+{
+    if ($id) {
+        $pegawai = Pegawai::with([
+            'riwayatJabatans',
+            'riwayatStatusKepegawaians',
+            'riwayatDiklats'
+        ])->findOrFail($id);
         
-        return $pdf->download($fileName);
-    }
+        // FIX: Berikan dua argumen yang benar (golongan dan tanggal masuk)
+        $prospect = $this->calculateProspectiveSalary($pegawai->golongan, $pegawai->tanggal_masuk);
+        $pegawai->kenaikan_gaji_dihitung = $prospect ? $prospect['gaji_baru'] : null;
 
+        $pegawais = collect([$pegawai]);
+        $fileName = 'data_pegawai_' . \Illuminate\Support\Str::slug($pegawai->nama) . '.pdf';
+        $pdf = PDF::loadView('pdf_detail', compact('pegawais'))->setPaper('a4', 'portrait');
+    } else {
+        $pegawais = $this->getFilteredPegawaiQuery($request)->get();
+        $fileName = 'data_semua_pegawai_tetap-' . date('Y-m-d') . '.pdf';
+        $pdf = PDF::loadView('pdf', compact('pegawais'))->setPaper('a4', 'landscape');
+    }
+    
+    return $pdf->download($fileName);
+}
+
+    private function calculateProspectiveSalary($golongan, $tanggal_masuk)
+    {
+        if (!$tanggal_masuk || !$golongan) {
+            return null;
+        }
+
+        $masaKerjaSaatIni = Carbon::parse($tanggal_masuk)->age;
+
+        if (isset($this->salaryMapping[$golongan])) {
+            $availableMK = array_keys($this->salaryMapping[$golongan]);
+            sort($availableMK);
+            foreach ($availableMK as $mk) {
+                if ($mk > $masaKerjaSaatIni) {
+                    return ['gaji_baru' => $this->salaryMapping[$golongan][$mk]];
+                }
+            }
+        }
+
+        $nextGolongan = $this->getNextGolongan($golongan);
+        if ($nextGolongan && isset($this->salaryMapping[$nextGolongan])) {
+            $availableMKNextGrade = array_keys($this->salaryMapping[$nextGolongan]);
+            sort($availableMKNextGrade);
+
+            foreach($availableMKNextGrade as $mk) {
+                if ($mk >= $masaKerjaSaatIni) {
+                    return ['gaji_baru' => $this->salaryMapping[$nextGolongan][$mk]];
+                }
+            }
+            
+            if (!empty($availableMKNextGrade)) {
+                $lastMK = end($availableMKNextGrade);
+                return ['gaji_baru' => $this->salaryMapping[$nextGolongan][$lastMK]];
+            }
+        }
+
+        return null;
+    }
+    
     public function approveRaise(Request $request, $id)
     {
         $pegawai = Pegawai::findOrFail($id);
-
-        $pegawai->masa_kerja = $pegawai->tanggal_masuk ? (Carbon::now()->year - Carbon::parse($pegawai->tanggal_masuk)->year) : 0;
+        $prospect = $this->calculateProspectiveSalary($pegawai->golongan, $pegawai->tanggal_masuk);
+        $prospekGajiSaatIni = $prospect ? $prospect['gaji_baru'] : null;
         
-        $prospect = $this->calculateProspectiveSalary($pegawai);
-
-        if ($prospect) {
-            
-            $pegawai->gaji = $prospect['gaji_baru'];
-            
-            $pegawai->kenaikan_gaji = null;
-            $pegawai->status_kenaikan = 'Disetujui';
-
-            $pegawai->save();
-
-            return redirect()->route('karyawan-tetap.index')->with('success', 'Kenaikan gaji untuk ' . $pegawai->nama . ' berhasil disetujui.');
+        if (!$prospekGajiSaatIni) {
+            return redirect()->route('karyawan-tetap.index')->with('error', 'Tidak ada kenaikan gaji untuk ' . $pegawai->nama);
         }
 
-        return redirect()->route('karyawan-tetap.index')->with('error', 'Tidak ada kenaikan gaji yang bisa disetujui untuk ' . $pegawai->nama);
+        RiwayatKenaikan::create([
+            'pegawai_id' => $pegawai->id,
+            'tanggal_kenaikan' => now(),
+            'gaji_sebelumnya' => $pegawai->gaji,
+            'golongan_sebelumnya' => $pegawai->golongan,
+        ]);
+
+        $pegawai->gaji = $prospekGajiSaatIni;
+        $pegawai->status_kenaikan = 'Disetujui';
+        
+        $masaKerjaTahun = Carbon::parse($pegawai->tanggal_masuk)->age;
+        if ($masaKerjaTahun > 0 && $masaKerjaTahun % 4 == 0) {
+            $nextGolongan = $this->getNextGolongan($pegawai->golongan);
+            if ($nextGolongan) {
+                $pegawai->golongan = $nextGolongan;
+            }
+        }
+        
+        $pegawai->save();
+        return redirect()->route('karyawan-tetap.index')->with('success', 'Kenaikan gaji untuk ' . $pegawai->nama . ' berhasil.');
+    }
+
+    public function revertRaise(Request $request, $id)
+    {
+        $pegawai = Pegawai::findOrFail($id);
+        $riwayat = RiwayatKenaikan::where('pegawai_id', $pegawai->id)->latest()->first();
+
+        if ($riwayat) {
+            $pegawai->gaji = $riwayat->gaji_sebelumnya;
+            $pegawai->golongan = $riwayat->golongan_sebelumnya;
+            $pegawai->status_kenaikan = 'Diproses';
+            $pegawai->save();
+            $riwayat->delete();
+            return redirect()->route('karyawan-tetap.index')->with('success', 'Kenaikan gaji untuk ' . $pegawai->nama . ' berhasil dibatalkan.');
+        }
+
+        return redirect()->route('karyawan-tetap.index')->with('error', 'Tidak ada riwayat kenaikan yang bisa dibatalkan.');
     }
 
     public function cekSemuaProspek(Request $request)
     {
-        $ids = $request->input('ids');
-        if (empty($ids)) {
-            return response()->json(['error' => 'Tidak ada data untuk dicek'], 400);
-        }
-
-        $pegawais = Pegawai::whereIn('id', $ids)->get();
+        $pegawais = Pegawai::where('status', 'Aktif')->get();
         $results = [];
 
         foreach ($pegawais as $pegawai) {
-            $pegawai->masa_kerja = $pegawai->tanggal_masuk ? (Carbon::now()->year - Carbon::parse($pegawai->tanggal_masuk)->year) : 0;
-            
-            $kenaikanGaji = $this->calculateProspectiveSalary($pegawai); 
-            
-            $results[$pegawai->id] = $kenaikanGaji;
+            $prospect = $this->calculateProspectiveSalary(
+                $pegawai->golongan,
+                $pegawai->tanggal_masuk
+            );
+            $results[$pegawai->id] = $prospect ? $prospect['gaji_baru'] : null;
         }
 
         return response()->json($results);

@@ -216,7 +216,7 @@
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-500">Keterangan (No. SK)</label>
+                                        <label class="block text-xs font-medium text-gray-500">No. SP / ST / SK</label>
                                         <input type="text" name="riwayat_status_kepegawaians[{{ $index }}][keterangan]"
                                             value="{{ old("riwayat_status_kepegawaians.$index.keterangan", $riwayat->keterangan) }}"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
@@ -260,7 +260,7 @@
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-500">No. SP / ST / SK</label>
+                                        <label class="block text-xs font-medium text-gray-500">No. SK / Surat tugas</label>
                                         <input type="text" name="riwayat_jabatans[{{ $index }}][nomor_sk]"
                                             value="{{ old("riwayat_jabatans.$index.nomor_sk", $riwayat->nomor_sk) }}"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">

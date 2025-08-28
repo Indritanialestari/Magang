@@ -24,9 +24,9 @@
                         <th scope="col" class="px-6 py-3">Unit Kerja</th>
                         <th scope="col" class="px-6 py-3">Klasifikasi</th>
                         <th scope="col" class="px-6 py-3">Tanggal Masuk</th>
-                        <th scope="col" class="px-6 py-3">Tanggal Perhitungan</th>
+                        <!-- <th scope="col" class="px-6 py-3">Tanggal Perhitungan</th> -->
                         <th scope="col" class="px-6 py-3">Umur</th>
-                        <th scope="col" class="px-6 py-3">Tanggal Pensiun</th>
+                        <!-- <th scope="col" class="px-6 py-3">Tanggal Pensiun</th> -->
                     </tr>
                 </thead>
                 <tbody>
@@ -39,9 +39,9 @@
                         <td class="px-6 py-4">{{ $history->unit_kerja }}</td>
                         <td class="px-6 py-4">{{ $history->klasifikasi }}</td>
                         <td class="px-6 py-4">{{ $history->tanggal_masuk ? \Carbon\Carbon::parse($history->tanggal_masuk)->format('d M Y') : '-' }}</td>
-                        <td class="px-6 py-4">{{ $history->created_at->format('d M Y') }}</td>
+                        <!-- <td class="px-6 py-4">{{ $history->created_at->format('d M Y') }}</td> -->
                         <td class="px-6 py-4">{{ $history->umur }} tahun</td>
-                        <td class="px-6 py-4">{{ $history->tanggal_pensiun }}</td>
+                        <!-- <td class="px-6 py-4">{{ $history->tanggal_pensiun }}</td> -->
                     </tr>
                     @empty
                     <tr>

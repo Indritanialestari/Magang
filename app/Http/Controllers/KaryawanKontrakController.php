@@ -327,26 +327,26 @@ class KaryawanKontrakController extends Controller
      * @param Request $request
      * @return \Illuminate\View\View
      */
-    public function previewPdf(Request $request)
-    {
-        $query = KaryawanKontrak::query();
+    // public function previewPdf(Request $request)
+    // {
+    //     $query = KaryawanKontrak::query();
 
-        if ($request->filled('search')) { $query->where('nama', 'like', '%' . $request->search . '%'); }
-        if ($request->filled('gender')) { $query->where('gender', $request->gender); }
-        if ($request->filled('status')) { $query->where('status', $request->status); }
-        if ($request->filled('kelipatan')) {
-            if ((int)$request->kelipatan > 0) { $query->whereRaw('masa_kerja % ? = 0', [(int)$request->kelipatan]); }
-        }
-        if ($request->filled('jabatan')) { $query->where('jabatan', $request->jabatan); }
-        if ($request->filled('bagian')) { $query->where('bagian', $request->bagian); }
-        if ($request->filled('unit_kerja')) { $query->where('unit_kerja', $request->unit_kerja); }
-        if ($request->filled('klasifikasi')) { $query->where('klasifikasi', $request->klasifikasi); }
-        if ($request->filled('keluarga_status')) { $query->where('keluarga_status', $request->keluarga_status); }
-        if ($request->filled('golongan')) { $query->where('golongan', $request->golongan); }
+    //     if ($request->filled('search')) { $query->where('nama', 'like', '%' . $request->search . '%'); }
+    //     if ($request->filled('gender')) { $query->where('gender', $request->gender); }
+    //     if ($request->filled('status')) { $query->where('status', $request->status); }
+    //     if ($request->filled('kelipatan')) {
+    //         if ((int)$request->kelipatan > 0) { $query->whereRaw('masa_kerja % ? = 0', [(int)$request->kelipatan]); }
+    //     }
+    //     if ($request->filled('jabatan')) { $query->where('jabatan', $request->jabatan); }
+    //     if ($request->filled('bagian')) { $query->where('bagian', $request->bagian); }
+    //     if ($request->filled('unit_kerja')) { $query->where('unit_kerja', $request->unit_kerja); }
+    //     if ($request->filled('klasifikasi')) { $query->where('klasifikasi', $request->klasifikasi); }
+    //     if ($request->filled('keluarga_status')) { $query->where('keluarga_status', $request->keluarga_status); }
+    //     if ($request->filled('golongan')) { $query->where('golongan', $request->golongan); }
 
-        $karyawanKontraks = (clone $query)->get();
-        return view('pdf', compact('karyawanKontraks'));
-    }
+    //     $karyawanKontraks = (clone $query)->get();
+    //     return view('pdf', compact('karyawanKontraks'));
+    // }
 
     /**
      * Mengekspor data karyawan kontrak ke format PDF berdasarkan filter.

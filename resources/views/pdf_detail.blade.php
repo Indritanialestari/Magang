@@ -65,7 +65,7 @@
                 <tr>
                     <th>Status Kepegawaian</th>
                     <th>Tanggal</th>
-                    <th>Keterangan (No. SK)</th>
+                    <th>No. SP / ST / SK</th>
                 </tr>
             </thead>
             <tbody>
@@ -86,8 +86,8 @@
              <thead>
                 <tr>
                     <th>Jabatan</th>
-                    <th>TMT</th>
-                    <th>Nomor SK</th>
+                    <th>Terhitung Mulai Tanggal</th>
+                    <th>Nomor SK / Surat Tugas</th>
                 </tr>
             </thead>
             <tbody>
@@ -107,7 +107,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Nama Materi</th>
+                    <th>Nama / Materi Diklat</th>
                     <th>Tempat</th>
                     <th>Tanggal Mulai</th>
                     <th>Tanggal Berakhir</th>

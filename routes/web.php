@@ -38,6 +38,8 @@ Route::get('/karyawan-kontrak/export', [KaryawanKontrakController::class, 'expor
 // --- Rute untuk Histori ---
 Route::get('/histori', [HistoriController::class, 'index'])->name('histori.index');
 
+Route::post('/karyawan-tetap/{id}/revert', [KaryawanTetapController::class, 'revertRaise'])->name('karyawan-tetap.revert');
+
 // --- Rute Otentikasi (tetap sama) ---
 Route::get('/login', function () {
     return view('login');

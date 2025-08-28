@@ -263,14 +263,28 @@
                 <span class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2-5 py-0.5 rounded">Tidak Aktif</span>
             @endif
         </td>
-        <td class="px-6 py-4 flex items-center space-x-2">
-            <a href="{{ route('karyawan-tetap.edit', $pegawai->id) }}" class="font-medium text-blue-600 hover:underline">Edit</a>
-            <form action="{{ route('karyawan-tetap.destroy', $pegawai->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="font-medium text-red-600 hover:underline">Hapus</button>
-            </form>
-        </td>
+{{-- Ganti seluruh blok <td> Aksi Anda dengan ini --}}
+<td class="px-6 py-4 flex flex-col items-start space-y-2">
+
+    {{-- Tombol Edit --}}
+    <a href="{{ route('karyawan-tetap.edit', $pegawai->id) }}" class="font-medium text-blue-600 hover:underline">Edit</a>
+
+    {{-- Tombol Hapus --}}
+    <form action="{{ route('karyawan-tetap.destroy', $pegawai->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus data {{ $pegawai->nama }}?');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="font-medium text-red-600 hover:underline">Hapus</button>
+    </form>
+    
+    {{-- Tombol Batalkan Kenaikan Gaji --}}
+    @if ($pegawai->status_kenaikan == 'Disetujui')
+        <form action="{{ route('karyawan-tetap.revert', $pegawai->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin membatalkan kenaikan gaji untuk {{ $pegawai->nama }}?');">
+            @csrf
+            <button type="submit" class="font-medium text-yellow-600 hover:underline">Batalkan</button>
+        </form>
+    @endif
+
+</td>
     </tr>
     @empty
     <tr>
