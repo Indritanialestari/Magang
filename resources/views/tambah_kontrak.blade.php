@@ -145,9 +145,12 @@
 
                 {{-- Fields khusus Karyawan Kontrak --}}
                 <div id="kontrak-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-full">
+                    
+                    {{-- Input Masa Kerja diubah menjadi tipe number agar bisa desimal --}}
                     <div>
-                        <label for="masa_kerja" class="block text-sm font-medium text-gray-700">Masa Kerja (contoh: 5 tahun 3 bulan)</label>
-                        <input type="text" name="masa_kerja" id="masa_kerja" value="{{ old('masa_kerja') }}"
+                        <label for="masa_kerja" class="block text-sm font-medium text-gray-700">Masa Kerja (Tahun)</label>
+                        <input type="number" step="0.1" name="masa_kerja" id="masa_kerja" value="{{ old('masa_kerja') }}"
+                               placeholder="Contoh: 5.5 untuk 5 setengah tahun"
                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         @error('masa_kerja')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
@@ -189,6 +192,7 @@
         </form>
     </div>
 
+{{-- [PERUBAHAN] Logika JavaScript diubah agar default-nya menampilkan field kontrak --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const jabatanSelect = document.getElementById('jabatan');
@@ -196,12 +200,15 @@
         const kontrakFields = document.getElementById('kontrak-fields');
 
         function toggleFields() {
-            if (jabatanSelect.value === 'Kontrak') {
-                tetapFields.style.display = 'none';
-                kontrakFields.style.display = 'grid';
-            } else {
+            // Logika ini akan menampilkan field 'tetap' HANYA JIKA jabatan dipilih dan BUKAN 'Kontrak'.
+            if (jabatanSelect.value !== 'Kontrak' && jabatanSelect.value !== '') {
+                // Tampilkan field karyawan tetap
                 tetapFields.style.display = 'grid';
                 kontrakFields.style.display = 'none';
+            } else {
+                // Untuk kondisi lainnya (default/kosong atau 'Kontrak'), tampilkan field kontrak
+                tetapFields.style.display = 'none';
+                kontrakFields.style.display = 'grid';
             }
         }
 

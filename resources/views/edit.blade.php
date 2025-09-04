@@ -21,7 +21,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('karyawan-tetap.update', $dataToEdit->id) }}" method="POST">
+            <form action="{{ route('karyawan-tetap.update', $dataToEdit->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -31,29 +31,61 @@
                     <div class="md:col-span-1">
                         <h3 class="text-xl font-semibold mb-4 text-gray-700">Data Pribadi</h3>
                         <div class="space-y-4">
+                            
+                            {{-- BLOK FOTO (LAYOUT BARU SESUAI GAMBAR) --}}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Foto Pegawai</label>
+                                <div class="mt-1 flex items-center space-x-4">
+                                    {{-- BAGIAN KIRI: INPUT FILE --}}
+                                    <div class="flex-grow">
+                                        <input type="file" name="foto" id="foto" 
+                                               class="block w-full text-sm text-gray-500
+                                                      file:mr-4 file:py-2 file:px-4
+                                                      file:rounded-md file:border-0
+                                                      file:text-sm file:font-semibold
+                                                      file:bg-blue-50 file:text-blue-700
+                                                      hover:file:bg-blue-100"/>
+                                        @error('foto')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                                    </div>
+                                    {{-- BAGIAN KANAN: PRATINJAU FOTO --}}
+                                    <div class="flex-shrink-0">
+                                        @if ($dataToEdit->foto)
+                                            <img src="{{ Storage::url($dataToEdit->foto) }}" alt="Foto Pegawai" 
+                                                 class="h-60 w-60 object-cover rounded-md shadow-sm border border-gray-200">
+                                        @else
+                                            {{-- Placeholder jika tidak ada foto --}}
+                                            <div class="h-20 w-20 flex items-center justify-center bg-gray-100 rounded-md border border-gray-200">
+                                                <span class="text-xs text-gray-400">No Photo</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            {{-- END BLOK FOTO --}}
+
                             <div>
                                 <label for="nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
                                 <input type="text" name="nama" id="nama"
-                                    value="{{ old('nama', $dataToEdit->nama) }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out"
-                                    required>
+                                       value="{{ old('nama', $dataToEdit->nama) }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out"
+                                       required>
                             </div>
                             <div>
                                 <label for="nomor_induk" class="block text-sm font-medium text-gray-700">Nomor Induk</label>
                                 <input type="text" name="nomor_induk" id="nomor_induk"
-                                    value="{{ old('nomor_induk', $dataToEdit->nomor_induk) }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                       value="{{ old('nomor_induk', $dataToEdit->nomor_induk) }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                             </div>
                             <div>
                                 <label for="tanggal_lahir" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
                                 <input type="date" name="tanggal_lahir" id="tanggal_lahir"
-                                    value="{{ old('tanggal_lahir', optional($dataToEdit->tanggal_lahir)->format('Y-m-d')) }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                       value="{{ old('tanggal_lahir', optional($dataToEdit->tanggal_lahir)->format('Y-m-d')) }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                             </div>
                             <div>
                                 <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
                                 <select name="gender" id="gender"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                                     <option value="Male" {{ old('gender', $dataToEdit->gender) == 'Male' ? 'selected' : '' }}>Laki-laki</option>
                                     <option value="Female" {{ old('gender', $dataToEdit->gender) == 'Female' ? 'selected' : '' }}>Perempuan</option>
                                 </select>
@@ -61,8 +93,8 @@
                             <div>
                                 <label for="pendidikan" class="block text-sm font-medium text-gray-700">Pendidikan Terakhir</label>
                                 <input type="text" name="pendidikan" id="pendidikan"
-                                    value="{{ old('pendidikan', $dataToEdit->pendidikan) }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                       value="{{ old('pendidikan', $dataToEdit->pendidikan) }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                             </div>
                             <div>
                                 <label for="keluarga_status" class="block text-sm font-medium text-gray-700">Status Keluarga</label>
@@ -75,8 +107,8 @@
                             <div>
                                 <label for="keluarga_anak" class="block text-sm font-medium text-gray-700">Jumlah Anak</label>
                                 <input type="number" name="keluarga_anak" id="keluarga_anak"
-                                    value="{{ old('keluarga_anak', $dataToEdit->keluarga_anak) }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                       value="{{ old('keluarga_anak', $dataToEdit->keluarga_anak) }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                             </div>
                         </div>
                     </div>
@@ -87,14 +119,14 @@
                             <div>
                                 <label for="tanggal_masuk" class="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
                                 <input type="date" name="tanggal_masuk" id="tanggal_masuk"
-                                    value="{{ old('tanggal_masuk', optional($dataToEdit->tanggal_masuk)->format('Y-m-d')) }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                       value="{{ old('tanggal_masuk', optional($dataToEdit->tanggal_masuk)->format('Y-m-d')) }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                             </div>
                             <div>
                                 <label for="jabatan" class="block text-sm font-medium text-gray-700">Jabatan</label>
                                 <select name="jabatan" id="jabatan"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out"
-                                    required>
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out"
+                                        required>
                                     @foreach($jabatanOptions as $option)
                                         <option value="{{ $option }}" {{ old('jabatan', $dataToEdit->jabatan) == $option ? 'selected' : '' }}>{{ $option }}</option>
                                     @endforeach
@@ -103,7 +135,7 @@
                             <div>
                                 <label for="bagian" class="block text-sm font-medium text-gray-700">Bagian</label>
                                 <select name="bagian" id="bagian"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                                     @foreach($bagianOptions as $option)
                                         <option value="{{ $option }}" {{ old('bagian', $dataToEdit->bagian) == $option ? 'selected' : '' }}>{{ $option }}</option>
                                     @endforeach
@@ -112,7 +144,7 @@
                             <div>
                                 <label for="unit_kerja" class="block text-sm font-medium text-gray-700">Unit Kerja</label>
                                 <select name="unit_kerja" id="unit_kerja"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                                     @foreach($unitKerjaOptions as $option)
                                         <option value="{{ $option }}" {{ old('unit_kerja', $dataToEdit->unit_kerja) == $option ? 'selected' : '' }}>{{ $option }}</option>
                                     @endforeach
@@ -134,10 +166,10 @@
                                     @endforeach
                                 </select>
                             </div>
-                             <div>
+                            <div>
                                 <label for="status" class="block text-sm font-medium text-gray-700">Status Pegawai</label>
                                 <select name="status" id="status"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                                     <option value="Aktif" {{ old('status', $dataToEdit->status) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
                                     <option value="Tidak Aktif" {{ old('status', $dataToEdit->status) == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
                                 </select>
@@ -153,19 +185,19 @@
                         <div>
                             <label for="gaji" class="block text-sm font-medium text-gray-700">Gaji Saat Ini</label>
                             <input type="number" name="gaji" id="gaji"
-                                value="{{ old('gaji', $dataToEdit->gaji) }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                   value="{{ old('gaji', $dataToEdit->gaji) }}"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                         </div>
                         <div>
                             <label for="kenaikan_gaji_dihitung" class="block text-sm font-medium text-gray-500">Prospek Kenaikan Gaji</label>
                             <input type="text" id="kenaikan_gaji_dihitung"
-                                value="{{ $kenaikan_gaji_dihitung ? 'Rp ' . number_format($kenaikan_gaji_dihitung, 0, ',', '.') : '-' }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-600 cursor-not-allowed" readonly>
+                                   value="{{ $kenaikan_gaji_dihitung ? 'Rp ' . number_format($kenaikan_gaji_dihitung, 0, ',', '.') : '-' }}"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-600 cursor-not-allowed" readonly>
                         </div>
                         <div>
                             <label for="status_kenaikan" class="block text-sm font-medium text-gray-700">Status Kenaikan</label>
                             <select name="status_kenaikan" id="status_kenaikan"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                                 <option value="">Pilih Status</option>
                                 @foreach($statusKenaikanOptions as $option)
                                     <option value="{{ $option }}" {{ old('status_kenaikan', $dataToEdit->status_kenaikan) == $option ? 'selected' : '' }}>{{ $option }}</option>
@@ -175,7 +207,7 @@
                         <div>
                             <label for="jenis_hukuman" class="block text-sm font-medium text-gray-700">Jenis Hukuman</label>
                             <select name="jenis_hukuman" id="jenis_hukuman"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out">
                                 <option value="">Tidak Ada</option>
                                 @foreach($jenisHukumanOptions as $option)
                                     <option value="{{ $option }}" {{ old('jenis_hukuman', $dataToEdit->jenis_hukuman) == $option ? 'selected' : '' }}>{{ $option }}</option>
@@ -216,7 +248,7 @@
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-500">Keterangan (No. SK)</label>
+                                        <label class="block text-xs font-medium text-gray-500">No. SP / ST / SK</label>
                                         <input type="text" name="riwayat_status_kepegawaians[{{ $index }}][keterangan]"
                                             value="{{ old("riwayat_status_kepegawaians.$index.keterangan", $riwayat->keterangan) }}"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
@@ -260,7 +292,7 @@
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-500">No. SP / ST / SK</label>
+                                        <label class="block text-xs font-medium text-gray-500">No. SK / Surat tugas</label>
                                         <input type="text" name="riwayat_jabatans[{{ $index }}][nomor_sk]"
                                             value="{{ old("riwayat_jabatans.$index.nomor_sk", $riwayat->nomor_sk) }}"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
@@ -333,7 +365,6 @@
                         @endforelse
                     </div>
                 </div>
-
 
                 {{-- Tombol Aksi --}}
                 <div class="mt-8 flex justify-end space-x-3 border-t pt-6">

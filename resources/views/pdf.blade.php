@@ -4,20 +4,21 @@
     <title>Data Pegawai</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            margin: 20px;
+            font-family: 'Bookman Old Style', serif;
+            font-size: 10pt;
+            color: #333;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
+            table-layout: fixed; /* KUNCI UTAMA: Mencegah tabel mengatur lebar otomatis */
         }
         th, td {
             border: 1px solid #000;
             padding: 4px 6px;
             text-align: left;
-            word-wrap: break-word;
+            word-wrap: break-word; /* Memastikan teks panjang pindah baris */
         }
         th {
             background-color: #f2f2f2;
@@ -52,7 +53,6 @@
         .download-button:hover {
             background-color: #45a049;
         }
-        /* Hapus bagian @media print, karena kita akan menggunakan kondisional Blade */
     </style>
 </head>
 <body>
@@ -66,6 +66,25 @@
     <h1>Data Pegawai</h1>
 
     <table>
+        {{-- Menentukan lebar setiap kolom secara manual agar tidak tembus --}}
+        <colgroup>
+            <col style="width: 11%;">
+            <col style="width: 6%;">
+            <col style="width: 6%;">
+            <col style="width: 4%;">
+            <col style="width: 8%;">
+            <col style="width: 8%;">
+            <col style="width: 8%;">
+            <col style="width: 7%;">
+            <col style="width: 7%;">
+            <col style="width: 6%;">
+            <col style="width: 4%;">
+            <col style="width: 6%;">
+            <col style="width: 4%;">
+            <col style="width: 4%;">
+            <col style="width: 7%;">
+            <col style="width: 4%;">
+        </colgroup>
         <thead>
             <tr>
                 <th>Nama</th>

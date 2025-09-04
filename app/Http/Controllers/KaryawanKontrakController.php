@@ -348,31 +348,45 @@ class KaryawanKontrakController extends Controller
         return view('pdf', compact('karyawanKontraks'));
     }
 
-    /**
-     * Mengekspor data karyawan kontrak ke format PDF berdasarkan filter.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function exportPdf(Request $request)
+    public function exportPdfReport(Request $request)
     {
         $query = KaryawanKontrak::query();
 
         if ($request->filled('search')) { $query->where('nama', 'like', '%' . $request->search . '%'); }
-        if ($request->filled('gender')) { $query->where('gender', $request->gender); }
+        if ($request->filled('gender')) { $query->where('gender', 'Male'); }
         if ($request->filled('status')) { $query->where('status', $request->status); }
         if ($request->filled('kelipatan')) {
             if ((int)$request->kelipatan > 0) { $query->whereRaw('masa_kerja % ? = 0', [(int)$request->kelipatan]); }
         }
         if ($request->filled('jabatan')) { $query->where('jabatan', $request->jabatan); }
-        if ($request->filled('bagian')) { $query->where('bagian', $request->bagian); }
-        if ($request->filled('unit_kerja')) { $query->where('unit_kerja', $request->unit_kerja); }
+        if ($request->filled('bagian')) { $query->where('bagian', 'Gudang'); }
+        if ($request->filled('unit_kerja')) { $query->where('unit_kerja', 'Pusat'); }
         if ($request->filled('klasifikasi')) { $query->where('klasifikasi', $request->klasifikasi); }
         if ($request->filled('keluarga_status')) { $query->where('keluarga_status', $request->keluarga_status); }
         if ($request->filled('golongan')) { $query->where('golongan', $request->golongan); }
 
         $karyawanKontraks = (clone $query)->get();
-        $pdf = PDF::loadView('pdf', compact('karyawanKontraks'))->setPaper('a4', 'landscape');
-        return $pdf->download('data_karyawan_kontrak.pdf');
+        
+        // Mengarahkan ke view 'pdf_kontrak.blade.php' untuk laporan
+        $pdf = PDF::loadView('pdf_kontrak', compact('karyawanKontraks'))->setPaper('a4', 'landscape');
+        
+        return $pdf->download('laporan-karyawan-kontrak.pdf');
+    }
+
+    /**
+     * FUNGSI BARU: Mengekspor DETAIL (satu karyawan) ke PDF.
+     * Dipanggil dari halaman edit (edit_kontrak).
+     * Menggunakan view: pdf_edit_kontrak.blade.php
+     */
+    public function exportPdfDetail($id)
+    {
+        // Cari satu karyawan berdasarkan ID
+        $karyawanKontrak = KaryawanKontrak::findOrFail($id);
+
+        // Mengarahkan ke view 'pdf_edit_kontrak.blade.php'
+        $pdf = PDF::loadView('pdf_edit_kontrak', compact('karyawanKontrak'));
+        
+        // Buat nama file dinamis berdasarkan nama karyawan
+        return $pdf->download('detail-karyawan-' . $karyawanKontrak->nama . '.pdf');
     }
 }

@@ -28,8 +28,13 @@
         </a>
         
         {{-- ========================================================= --}}
-        {{-- LINK HISTORI DITAMBAHKAN DI SINI --}}
+        {{-- TOMBOL BARU DITAMBAHKAN DI SINI --}}
         {{-- ========================================================= --}}
+        <a href="{{ route('skala-gaji.index') }}"
+           class="flex items-center p-3 rounded-lg text-lg font-medium hover:bg-blue-600 transition-colors duration-200 mb-3">
+            <span class="mr-3 text-2xl">💰</span> Skala Gaji
+        </a>
+        
         <a href="{{ route('histori.index') }}"
            class="flex items-center p-3 rounded-lg text-lg font-medium hover:bg-blue-600 transition-colors duration-200 mb-3">
             <span class="mr-3 text-2xl">🗂️</span> Histori

@@ -98,8 +98,8 @@
                     </a>
                 </div>
                 <div>
-                    <a href="{{ route('karyawan-kontrak.exportPdf', request()->query()) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2">
-                        Download PDF
+                    <a href="{{ route('karyawan-kontrak.exportReport', request()->query()) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                        Download Laporan PDF
                     </a>
                 </div>
             </div>

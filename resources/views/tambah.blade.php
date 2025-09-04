@@ -18,8 +18,8 @@
             </div>
         @endif
 
-        {{-- Form action diarahkan ke store() di KaryawanTetapController --}}
-        <form action="{{ route('karyawan-tetap.store') }}" method="POST">
+        {{-- PERUBAHAN 1: Menambahkan enctype untuk upload file --}}
+        <form action="{{ route('karyawan-tetap.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -37,6 +37,19 @@
                     @error('nomor_induk')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
+                {{-- PERUBAHAN 2: Menambahkan Input untuk Upload Foto --}}
+                <div class="col-span-full">
+                    <label for="foto" class="block text-sm font-medium text-gray-700">Foto Pegawai (Opsional)</label>
+                    <input type="file" name="foto" id="foto"
+                           class="mt-1 block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-md file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-blue-50 file:text-blue-700
+                                  hover:file:bg-blue-100">
+                    @error('foto')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+                
                 <div>
                     <label for="tanggal_lahir" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
                     <input type="date" name="tanggal_lahir" id="tanggal_lahir" value="{{ old('tanggal_lahir') }}"

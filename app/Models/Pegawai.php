@@ -17,6 +17,7 @@ class Pegawai extends Model
      */
     protected $fillable = [
         'nama',
+        'foto', // <-- PERUBAHANNYA DI SINI
         'tanggal_lahir',
         'gender',
         'nomor_induk',
